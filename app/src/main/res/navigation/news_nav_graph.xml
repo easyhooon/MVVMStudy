@@ -17,11 +17,11 @@
             app:popExitAnim="@anim/slide_out_right"/>
     </fragment>
     <fragment
-        android:id="@+id/searchNewsFragment"
-        android:name="com.kenshi.mvvmnewsapp.ui.fragments.SearchNewsFragment"
-        android:label="SearchNewsFragment">
+        android:id="@+id/savedNewsFragment"
+        android:name="com.kenshi.mvvmnewsapp.ui.fragments.SavedNewsFragment"
+        android:label="SavedNewsFragment">
         <action
-            android:id="@+id/action_searchNewsFragment_to_articleFragment"
+            android:id="@+id/action_savedNewsFragment_to_articleFragment"
             app:destination="@id/articleFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
@@ -29,11 +29,11 @@
             app:popExitAnim="@anim/slide_out_right"/>
     </fragment>
     <fragment
-        android:id="@+id/savedNewsFragment"
-        android:name="com.kenshi.mvvmnewsapp.ui.fragments.SavedNewsFragment"
-        android:label="SavedNewsFragment">
+        android:id="@+id/searchNewsFragment"
+        android:name="com.kenshi.mvvmnewsapp.ui.fragments.SearchNewsFragment"
+        android:label="SearchNewsFragment">
         <action
-            android:id="@+id/action_savedNewsFragment_to_articleFragment"
+            android:id="@+id/action_searchNewsFragment_to_articleFragment"
             app:destination="@id/articleFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"

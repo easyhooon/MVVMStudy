@@ -7,5 +7,5 @@ plugins {
  }
 
 task clean(type: Delete) {
-    delete rootProject.buildDirS
+    delete rootProject.buildDir
 }

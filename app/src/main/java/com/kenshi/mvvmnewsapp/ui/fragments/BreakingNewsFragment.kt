@@ -9,8 +9,6 @@ import android.widget.AbsListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +22,10 @@ import com.kenshi.mvvmnewsapp.util.Constants.Companion.QUERY_PAGE_SIZE
 import com.kenshi.mvvmnewsapp.util.Resource
 
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
+
+    companion object {
+        const val ARTICLE = "article"
+    }
 
     lateinit var binding: FragmentBreakingNewsBinding
 
@@ -49,19 +51,20 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
         newsAdapter.setOnItemClickListener {
             val bundle = Bundle().apply {
-                putSerializable("article", it)
+                putSerializable(ARTICLE, it)
             }
             findNavController().navigate(
                 R.id.action_breakingNewsFragment_to_articleFragment,
                 bundle
             )
+            Log.d(TAG, "onViewCreated: recyclerview item click!")
         }
 
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
             when(response) {
                 is Resource.Success -> {
                     hideProgressBar()
-//                    hideErrorMessage()
+                    hideErrorMessage()
                     response.data?.let { newsResponse ->
                         //list differ can't work with mutableLists properly
                         newsAdapter.differ.submitList(newsResponse.articles.toList())
@@ -77,6 +80,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
                     response.message?.let { message ->
                         //Log.e(TAG, "An error occured: $message", )
                         Toast.makeText(activity, "An error occured: $message", Toast.LENGTH_LONG).show()
+                        showErrorMessage(message)
                     }
                 }
                 is Resource.Loading -> {
@@ -84,15 +88,24 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
                 }
             }
         })
-//        binding.btnRetry.setOnClickListener {
-//            viewModel.getBreakingNews("us")
-//        }
+
+        binding.itemErrorMessage.btnRetry.setOnClickListener {
+            viewModel.getBreakingNews(COUNTRY_CODE)
+        }
     }
 
-//    private fun hideErrorMessage() {
-//        binding.itemErrorMessage.visibility = View.INVISIBLE
-//        isError = false
-//    }
+    private fun hideErrorMessage() {
+        binding.itemErrorMessage.root.visibility = View.INVISIBLE
+        //binding.itemErrorMessage.visibility = View.INVISIBLE
+        isError = false
+    }
+
+    private fun showErrorMessage(message: String) {
+        binding.itemErrorMessage.root.visibility = View.VISIBLE
+       // binding.itemErrorMessage.visibility = View.VISIBLE
+        binding.itemErrorMessage.tvErrorMessage.text = message
+        isError = true
+    }
 
     private fun hideProgressBar() {
         binding.paginationProgressBar.visibility = View.INVISIBLE
@@ -105,6 +118,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     }
 
     //pagination setting (paging3 로 하면 더 간단하게 할 수 있을 듯)
+    var isError = false
     var isLoading = false
     var isLastPage = false
     var isScrolling = false
@@ -118,11 +132,12 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             val visibleItemCount = layoutManager.childCount
             val totalItemCount = layoutManager.itemCount
 
+            val isNoErrors = !isError
             val isNotLoadingAndNotLastPage = !isLoading && !isLastPage
             val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
             val isNotAtBeginning = firstVisibleItemPosition >= 0
             val isTotalMoreThanVisible = totalItemCount >= QUERY_PAGE_SIZE
-            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
+            val shouldPaginate = isNoErrors && isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
                 viewModel.getBreakingNews(COUNTRY_CODE)
